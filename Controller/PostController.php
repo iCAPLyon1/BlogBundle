@@ -83,7 +83,7 @@ class PostController extends Controller
      */
     public function newAction(Request $request, Blog $blog)
     {
-        $this->checkAccess("EDIT", $blog);
+        $this->checkAccess(array("EDIT", "POST"), $blog, "OR");
 
         $user = $this->get('security.context')->getToken()->getUser();
 
@@ -117,7 +117,7 @@ class PostController extends Controller
      */
     public function editAction(Request $request, Blog $blog, Post $post)
     {
-        $this->checkAccess("EDIT", $blog);
+        $this->checkAccess(array("EDIT", "POST"), $blog, "OR");
 
         $user = $this->get('security.context')->getToken()->getUser();
 
@@ -136,7 +136,7 @@ class PostController extends Controller
         /** @var \Claroline\CoreBundle\Library\Configuration\PlatformConfigurationHandler $platformConfigHandler */
         $platformConfigHandler = $this->get('claroline.config.platform_config_handler');
 
-        $form = $this->createForm(new PostType(), $post, array('language' => $platformConfigHandler->getParameter('locale_language'), 'date_format' => $this->get('translator')->trans('date_form_format', array(), 'platform')));
+        $form = $this->createForm($this->get('icap_blog.form.post'), $post, array('language' => $platformConfigHandler->getParameter('locale_language'), 'date_format' => $this->get('translator')->trans('date_form_format', array(), 'platform')));
 
         if ("POST" === $request->getMethod()) {
             $form->handleRequest($request);
@@ -189,7 +189,7 @@ class PostController extends Controller
      */
     public function deleteAction(Blog $blog, Post $post)
     {
-        $this->checkAccess("EDIT", $blog);
+        $this->checkAccess(array("EDIT", "POST"), $blog, "OR");
 
         $entityManager = $this->getDoctrine()->getManager();
         $translator    = $this->get('translator');

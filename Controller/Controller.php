@@ -27,16 +27,33 @@ class Controller extends BaseController
     const BLOG_COMMENT_TYPE = 'icap_blog_comment';
 
     /**
-     * @param string $permission
+     * @param string $permissions
      *
-     * @param Blog $blog
+     * @param Blog   $blog
      *
-     * @throws AccessDeniedException
+     * @param string $comparison
+     *
+     * @throws \Symfony\Component\Security\Core\Exception\AccessDeniedException
      */
-    protected function checkAccess($permission, Blog $blog)
+    protected function checkAccess($permissions, Blog $blog, $comparison = "AND")
     {
         $collection = new ResourceCollection(array($blog->getResourceNode()));
-        if (!$this->get('security.context')->isGranted($permission, $collection)) {
+        $isGranted = true;
+
+        if (false === is_array($permissions)) {
+            $permissions = array($permissions);
+        }
+
+        foreach ($permissions as $permission) {
+            if ("OR" === $comparison) {
+                $isGranted = $isGranted || $this->get('security.context')->isGranted($permission, $collection);
+            }
+            else {
+                $isGranted += $this->get('security.context')->isGranted($permission, $collection);
+            }
+        }
+
+        if (false === $isGranted) {
             throw new AccessDeniedException($collection->getErrorsForDisplay());
         }
 
@@ -67,7 +84,7 @@ class Controller extends BaseController
      */
     protected function getArchiveDatas(Blog $blog)
     {
-        $postDatas          = $this->get('icap.blog.post_repository')->findArchiveDatasByBlog($blog);
+        $postDatas    = $this->get('icap.blog.post_repository')->findArchiveDatasByBlog($blog);
         $archiveDatas = array();
 
         $translator = $this->get('translator');
