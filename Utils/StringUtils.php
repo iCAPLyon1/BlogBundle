@@ -2,7 +2,7 @@
 
 namespace Icap\BlogBundle\Utils;
 
-class String
+class StringUtils
 {
     /**
      * Came from http://j-reaux.developpez.com/tutoriel/php/fonctions-troncature-texte/
@@ -96,4 +96,4 @@ class String
         return $text;
     }
 }
- 
+
