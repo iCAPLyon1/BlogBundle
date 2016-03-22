@@ -82,8 +82,7 @@ class BlogListener extends ContainerAware
     public function onDelete(DeleteResourceEvent $event)
     {
         $blog = $event->getResource();
-        $options = $blog->getOptions();
-        @unlink($this->container->getParameter('icap.blog.banner_directory') . DIRECTORY_SEPARATOR . $options->getBannerBackgroundImage());
+        $this->container->get('icap_blog.manager.blog')->delete($blog);
         $event->stopPropagation();
     }
 
