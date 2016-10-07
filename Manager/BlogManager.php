@@ -27,7 +27,7 @@ class BlogManager
     /**
      * @DI\InjectParams({
      *      "objectManager" = @DI\Inject("claroline.persistence.object_manager"),
-     *      "uploadDir" = @DI\Inject("%icap.blog.banner_directory%")
+     *      "uploadDir"     = @DI\Inject("%icap.blog.banner_directory%")
      * })
      */
     public function __construct(ObjectManager $objectManager, $uploadDir)
@@ -270,4 +270,17 @@ class BlogManager
         );
     }
 
+    public function delete(Blog $blog)
+    {
+        $options = $blog->getOptions();
+        //Removing widgets that are referencing the blog. The cascade delete doesn't work properly for some reason.
+        @unlink($this->uploadDir . DIRECTORY_SEPARATOR . $options->getBannerBackgroundImage());
+        $widgetBlogs = $this->objectManager->getRepository('Icap\BlogBundle\Entity\WidgetBlog')->findByResourceNode($blog->getResourceNode());
+        $this->objectManager->remove($blog);
+
+        foreach ($widgetBlogs as $widget) {
+            $this->objectManager->remove($widget);
+            $this->objectManager->remove($widget->getWidgetInstance());
+        }
+    }
 }
